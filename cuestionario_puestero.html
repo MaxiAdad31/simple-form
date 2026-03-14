@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuestionario del Puestero — Mercado de Abasto, Córdoba</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --verde: #2D6A4F;
+    --verde-c: #52B788;
+    --verde-p: #D8F3DC;
+    --naranja: #E76F51;
+    --naranja-p: #FFF0EB;
+    --amarillo: #E9C46A;
+    --amarillo-p: #FFF8E7;
+    --azul: #2171B5;
+    --azul-p: #EFF6FF;
+    --violeta: #6B46C1;
+    --violeta-p: #F5F3FF;
+    --bg: #ffffff;
+    --bg2: #f7f6f2;
+    --txt: #1a1a18;
+    --txts: #6b6b65;
+    --borde: rgba(0,0,0,0.12);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #252523;
+      --txt: #e8e6de;
+      --txts: #9c9a92;
+      --borde: rgba(255,255,255,0.12);
+      --verde-p: #0d2b1e;
+      --naranja-p: #2a150e;
+      --amarillo-p: #2a1f08;
+      --azul-p: #0c1f35;
+      --violeta-p: #1e1535;
+    }
+  }
+
+  body {
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--txt);
+    background: var(--bg2);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-bottom: 3rem;
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .no-print { display: none !important; }
+    .bloque-body { display: block !important; }
+    .bloque-header { cursor: default; }
+    .resultado { display: block !important; }
+  }
+
+  /* Header */
+  .hdr {
+    background: var(--verde);
+    border-radius: 14px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hdr::before {
+    content: '';
+    position: absolute;
+    right: -30px; top: -30px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .hdr-tag {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--verde-c); margin-bottom: 0.5rem;
+  }
+  .hdr h1 {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 24px; font-weight: 700;
+    color: #fff; line-height: 1.3; margin-bottom: 0.6rem;
+  }
+  .hdr p { font-size: 14px; color: rgba(255,255,255,0.78); line-height: 1.65; }
+  .hdr-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.1rem; }
+  .pill {
+    background: rgba(255,255,255,0.13);
+    border-radius: 20px; padding: 4px 13px;
+    font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600;
+  }
+
+  /* Progreso */
+  .progreso-wrap { margin-bottom: 1.25rem; }
+  .progreso-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--txts); margin-bottom: 6px; }
+  .progreso-track { height: 5px; background: var(--bg); border-radius: 10px; overflow: hidden; border: 0.5px solid var(--borde); }
+  .progreso-fill { height: 100%; background: var(--verde); border-radius: 10px; transition: width 0.4s ease; }
+
+  /* Bloques */
+  .bloque { margin-bottom: 1.25rem; }
+  .bloque-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    cursor: pointer; user-select: none;
+    border: 0.5px solid var(--borde);
+    transition: border-radius 0.2s;
+  }
+  .bloque-header.abierto { border-radius: 10px 10px 0 0; border-bottom: none; }
+  .bloque-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .bloque-titulo { flex: 1; }
+  .bloque-titulo h2 { font-size: 14px; font-weight: 600; color: var(--txt); }
+  .bloque-titulo p { font-size: 12px; color: var(--txts); margin-top: 1px; }
+  .bloque-contador {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 20px; flex-shrink: 0;
+  }
+  .bloque-chevron { font-size: 11px; color: var(--txts); transition: transform 0.25s; flex-shrink: 0; }
+  .bloque-chevron.girado { transform: rotate(180deg); }
+
+  .bloque-body {
+    border: 0.5px solid var(--borde);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 1.1rem;
+    background: var(--bg);
+    display: none;
+  }
+  .bloque-body.visible { display: block; }
+
+  /* Preguntas */
+  .pregunta { margin-bottom: 1.1rem; }
+  .pregunta:last-child { margin-bottom: 0; }
+  .pregunta label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--txt); margin-bottom: 5px; line-height: 1.45;
+  }
+  .pregunta .hint {
+    font-size: 11px; color: var(--txts);
+    margin-bottom: 6px; font-style: italic; line-height: 1.4;
+  }
+  textarea, input[type="text"] {
+    width: 100%;
+    border: 0.5px solid var(--borde);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px; color: var(--txt);
+    background: var(--bg2);
+    resize: vertical; outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.55;
+  }
+  textarea { min-height: 72px; }
+  textarea:focus, input[type="text"]:focus { border-color: var(--verde); background: var(--bg); }
+
+  .opciones { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .opcion-btn {
+    padding: 6px 13px;
+    border: 0.5px solid var(--borde);
+    border-radius: 20px; font-size: 12px;
+    font-family: 'Source Sans 3', sans-serif;
+    cursor: pointer; background: var(--bg2);
+    color: var(--txts); transition: all 0.15s;
+  }
+  .opcion-btn:hover { border-color: var(--verde); color: var(--verde); }
+  .opcion-btn.seleccionado {
+    background: var(--verde-p); border-color: var(--verde);
+    color: var(--verde); font-weight: 600;
+  }
+
+  .sep { border: none; border-top: 0.5px solid var(--borde); margin: 0.9rem 0; }
+
+  /* Botones */
+  .nav-btns {
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 10px; margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 22px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    font-family: 'Source Sans 3', sans-serif;
+    cursor: pointer; border: 0.5px solid var(--borde);
+    background: var(--bg); color: var(--txt);
+    transition: all 0.15s; text-decoration: none;
+    display: inline-block;
+  }
+  .btn:hover { background: var(--bg2); }
+  .btn.primario { background: var(--verde); color: #fff; border-color: var(--verde); }
+  .btn.primario:hover { opacity: 0.88; }
+  .btn.secundario { background: var(--azul); color: #fff; border-color: var(--azul); }
+  .btn.secundario:hover { opacity: 0.88; }
+
+  /* Resultado */
+  .resultado {
+    display: none; margin-top: 1.5rem;
+    background: var(--verde-p);
+    border: 0.5px solid var(--verde-c);
+    border-radius: 12px; padding: 1.5rem;
+  }
+  .resultado h2 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 18px; color: var(--verde); margin-bottom: 0.5rem;
+  }
+  .resultado > p { font-size: 13px; color: #1B4332; line-height: 1.65; margin-bottom: 1rem; }
+  .resumen-bloque { margin-top: 0.75rem; }
+  .resumen-seccion { margin-bottom: 1rem; }
+  .resumen-titulo {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--verde); margin-bottom: 0.4rem;
+  }
+  .resumen-item { font-size: 13px; color: #1B4332; margin-bottom: 0.3rem; line-height: 1.5; }
+
+  /* Footer */
+  .footer {
+    text-align: center; margin-top: 2rem;
+    font-size: 11px; color: var(--txts);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hdr">
+    <div class="hdr-tag">Cuestionario de experiencia</div>
+    <h1>El saber del puestero<br>Mercado de Abasto, Córdoba</h1>
+    <p>Respondé con total libertad. No hay respuestas incorrectas — lo que más vale acá es lo que aprendiste viviendo el negocio durante más de 50 años.</p>
+    <div class="hdr-pills">
+      <span class="pill">2 puestos</span>
+      <span class="pill">~400 bultos/día</span>
+      <span class="pill">6 secciones · 29 preguntas</span>
+    </div>
+  </div>
+
+  <div class="progreso-wrap">
+    <div class="progreso-label">
+      <span id="prog-texto">Empezá por cualquier sección</span>
+      <span id="prog-pct">0% completado</span>
+    </div>
+    <div class="progreso-track">
+      <div class="progreso-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 1 -->
+  <div class="bloque" id="b1">
+    <div class="bloque-header abierto" style="background:var(--verde-p);border-color:var(--verde-c);" onclick="toggleBloque(1)">
+      <div class="bloque-icon" style="background:var(--verde);color:#fff;">🏪</div>
+      <div class="bloque-titulo">
+        <h2>El negocio hoy</h2>
+        <p>Cómo está funcionando todo en este momento</p>
+      </div>
+      <div class="bloque-contador" style="background:var(--verde);color:#fff;">6 preguntas</div>
+      <div class="bloque-chevron girado" id="chev1">▼</div>
+    </div>
+    <div class="bloque-body visible" id="body1">
+
+      <div class="pregunta">
+        <label>1. ¿En qué horario abrís y cuántas personas trabajan en el puesto?</label>
+        <textarea id="q1_1" placeholder="Ej: Abrimos a las 5am, somos 3 personas..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>2. ¿Qué productos son los que más vendés hoy? ¿Hay alguno que siempre te pidan?</label>
+        <div class="hint">Nombrá los 5 o 6 productos estrella del puesto.</div>
+        <textarea id="q1_2" placeholder="Ej: Tomate, papa, cebolla... el limón en verano vuela..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>3. ¿Cómo llegás a tus proveedores? ¿De dónde comprás la mercadería?</label>
+        <div class="hint">Mercado Central, productores directos, intermediarios, combinación...</div>
+        <textarea id="q1_3" placeholder="Ej: Vamos al Mercado Central tres veces por semana..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>4. ¿Quiénes son tus clientes hoy? ¿Cuántos son particulares y cuántos son negocios?</label>
+        <div class="opciones" id="q1_4">
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_4')">Mayoría particulares</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_4')">Mayoría negocios / locales</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_4')">Mitad y mitad</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_4')">Depende la temporada</button>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>5. ¿Qué días o momentos del día son los más movidos?</label>
+        <textarea id="q1_5" placeholder="Ej: Los lunes a la mañana y los viernes son una locura..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>6. ¿Cuánto perdés por semana en mercadería que no se vende o se pasa?</label>
+        <div class="opciones" id="q1_6">
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_6')">Muy poco, casi nada</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_6')">Algo, pero lo controlamos</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_6')">Bastante, nos preocupa</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q1_6')">Varía mucho según el mes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 2 -->
+  <div class="bloque" id="b2">
+    <div class="bloque-header cerrado" style="background:var(--azul-p);border-color:#93C5FD;" onclick="toggleBloque(2)">
+      <div class="bloque-icon" style="background:var(--azul);color:#fff;">🌦️</div>
+      <div class="bloque-titulo">
+        <h2>Clima y estaciones</h2>
+        <p>Cómo afecta el tiempo al negocio</p>
+      </div>
+      <div class="bloque-contador" style="background:var(--azul);color:#fff;">5 preguntas</div>
+      <div class="bloque-chevron" id="chev2">▼</div>
+    </div>
+    <div class="bloque-body" id="body2">
+      <div class="pregunta">
+        <label>7. ¿En qué época del año vendés más? ¿Hay meses que son claramente mejores?</label>
+        <div class="hint">Pensá en los últimos años. ¿Hay un patrón que se repite?</div>
+        <textarea id="q2_1" placeholder="Ej: Julio y agosto bajan mucho, en cambio en diciembre..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>8. ¿Qué pasa con las ventas cuando hace mucho calor? ¿Y cuando llueve fuerte?</label>
+        <textarea id="q2_2" placeholder="Ej: Con lluvia nadie sale, pero si hace calor la gente compra más cítricos y frutas..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>9. ¿Qué productos cambian más según la estación? ¿Cuáles son los de verano y cuáles los de invierno?</label>
+        <textarea id="q2_3" placeholder="Ej: En verano vuelan el durazno y la sandía, en invierno la naranja y la mandarina..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>10. ¿Hubo alguna temporada o clima particular que te sorprendió — para bien o para mal?</label>
+        <div class="hint">Momentos raros, años difíciles, épocas de bonanza inesperada...</div>
+        <textarea id="q2_4" placeholder="Ej: El año que heló en Mendoza, los precios se dispararon y nosotros teníamos stock..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>11. ¿Cómo te preparás hoy para las temporadas bajas? ¿Hacés algo diferente?</label>
+        <textarea id="q2_5" placeholder="Ej: Bajamos el pedido, guardamos algo de efectivo, ofrecemos otras cosas..." oninput="actualizarProgreso()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 3 -->
+  <div class="bloque" id="b3">
+    <div class="bloque-header cerrado" style="background:var(--naranja-p);border-color:#FCA981;" onclick="toggleBloque(3)">
+      <div class="bloque-icon" style="background:var(--naranja);color:#fff;">🤝</div>
+      <div class="bloque-titulo">
+        <h2>Los clientes</h2>
+        <p>Lo que sabés de quien compra</p>
+      </div>
+      <div class="bloque-contador" style="background:var(--naranja);color:#fff;">5 preguntas</div>
+      <div class="bloque-chevron" id="chev3">▼</div>
+    </div>
+    <div class="bloque-body" id="body3">
+      <div class="pregunta">
+        <label>12. ¿Por qué creés que los clientes te eligen a vos y no al puesto de al lado?</label>
+        <div class="hint">¿Qué es lo que más te dicen que les gusta?</div>
+        <textarea id="q3_1" placeholder="Ej: Dicen que somos de confianza, que la mercadería es fresca, que les damos bola..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>13. ¿Tenés clientes de hace muchos años? ¿Qué los mantiene volviendo?</label>
+        <textarea id="q3_2" placeholder="Ej: Doña Rosa viene hace 20 años porque le guardamos siempre su mandado..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>14. ¿Hay algo que los clientes te pidan que hoy no podés darles o no tenés?</label>
+        <textarea id="q3_3" placeholder="Ej: Nos piden delivery, algunas verduras orgánicas, más variedad de hojas..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>15. ¿Cómo fue cambiando el perfil del cliente con los años?</label>
+        <div class="hint">¿Viene menos gente pero compra más? ¿Vino gente nueva? ¿Cambió el tipo de cliente?</div>
+        <textarea id="q3_4" placeholder="Ej: Antes venían más amas de casa, ahora vienen más restaurantes y cocinerías..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>16. ¿Usás el celular para comunicarte con clientes hoy?</label>
+        <div class="opciones" id="q3_5">
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q3_5')">Sí, mucho</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q3_5')">Algo, pero poco</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q3_5')">Casi nada</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q3_5')">Nada, todo es presencial</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 4 -->
+  <div class="bloque" id="b4">
+    <div class="bloque-header cerrado" style="background:var(--amarillo-p);border-color:var(--amarillo);" onclick="toggleBloque(4)">
+      <div class="bloque-icon" style="background:var(--amarillo);color:#1a1a1a;">⚡</div>
+      <div class="bloque-titulo">
+        <h2>Momentos clave del año</h2>
+        <p>Fiestas, eventos y picos de venta</p>
+      </div>
+      <div class="bloque-contador" style="background:var(--amarillo);color:#713F12;">4 preguntas</div>
+      <div class="bloque-chevron" id="chev4">▼</div>
+    </div>
+    <div class="bloque-body" id="body4">
+      <div class="pregunta">
+        <label>17. ¿Qué fechas del año son las mejores para el negocio? ¿Por qué?</label>
+        <div class="hint">Fiestas, Semana Santa, inicio de clases, Mundial, etc.</div>
+        <textarea id="q4_1" placeholder="Ej: Semana Santa es una locura con las verduras, en diciembre se vende mucho para las ensaladas..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>18. ¿Y qué fechas son las más flojas o complicadas? ¿Cómo las manejás?</label>
+        <textarea id="q4_2" placeholder="Ej: Las dos primeras semanas de enero, cuando todo el mundo está de vacaciones..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>19. ¿Hubo alguna crisis económica o momento muy difícil que recuerdes especialmente? ¿Cómo saliste?</label>
+        <div class="hint">2001, pandemia, inflaciones fuertes... Lo que se te venga a la mente.</div>
+        <textarea id="q4_3" placeholder="Ej: En el 2001 muchos cerraron, nosotros aguantamos porque..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>20. ¿Hay algún producto o temporada que hayas descubierto con los años que "sorprende" y vende bien?</label>
+        <textarea id="q4_4" placeholder="Ej: La rúcula empezó a pedirse mucho los últimos 10 años, antes nadie la quería..." oninput="actualizarProgreso()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 5 -->
+  <div class="bloque" id="b5">
+    <div class="bloque-header cerrado" style="background:var(--violeta-p);border-color:#C4B5FD;" onclick="toggleBloque(5)">
+      <div class="bloque-icon" style="background:var(--violeta);color:#fff;">🤲</div>
+      <div class="bloque-titulo">
+        <h2>Colegas y dinámica del mercado</h2>
+        <p>Cómo es la convivencia con los demás puesteros</p>
+      </div>
+      <div class="bloque-contador" style="background:var(--violeta);color:#fff;">4 preguntas</div>
+      <div class="bloque-chevron" id="chev5">▼</div>
+    </div>
+    <div class="bloque-body" id="body5">
+      <div class="pregunta">
+        <label>21. ¿Cómo es la relación con los otros puesteros del mercado? ¿Se ayudan entre ustedes?</label>
+        <textarea id="q5_1" placeholder="Ej: Hay mucho compañerismo, si me falta algo me lo presta el de al lado..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>22. ¿Hay cosas que no harías nunca para no romper la relación con los colegas? ¿Cuáles?</label>
+        <div class="hint">Esto es clave para entender los límites que no deben cruzarse.</div>
+        <textarea id="q5_2" placeholder="Ej: Nunca le robaría un cliente a alguien del mercado..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>23. ¿Cómo cambió el mercado en los últimos 10 años?</label>
+        <textarea id="q5_3" placeholder="Ej: Vinieron verdulerías de supermercados cerca, algunos puestos cerraron..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>24. ¿Hay algo que el mercado en su conjunto podría hacer mejor y que hoy no hace?</label>
+        <textarea id="q5_4" placeholder="Ej: Más publicidad del mercado, horarios extendidos, entregas en conjunto..." oninput="actualizarProgreso()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 6 -->
+  <div class="bloque" id="b6">
+    <div class="bloque-header cerrado" style="background:#F0FDF4;border-color:#86EFAC;" onclick="toggleBloque(6)">
+      <div class="bloque-icon" style="background:#16A34A;color:#fff;">💡</div>
+      <div class="bloque-titulo">
+        <h2>Tu visión del futuro</h2>
+        <p>Qué querés para el negocio y qué te preocupa</p>
+      </div>
+      <div class="bloque-contador" style="background:#16A34A;color:#fff;">5 preguntas</div>
+      <div class="bloque-chevron" id="chev6">▼</div>
+    </div>
+    <div class="bloque-body" id="body6">
+      <div class="pregunta">
+        <label>25. ¿Qué te gustaría que fuera diferente en el negocio de acá a 2 años?</label>
+        <textarea id="q6_1" placeholder="Ej: Vender 100 bultos más por día, que entre alguien de la familia..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>26. ¿Qué es lo que más te preocupa del negocio hoy?</label>
+        <div class="opciones" id="q6_2">
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_2')">La inflación y los costos</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_2')">La competencia (súper, online)</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_2')">Conseguir buena mercadería</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_2')">La sucesión familiar</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_2')">Que baje la clientela</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_2')">Otro</button>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>27. Si tuvieras que explicarle a alguien joven el secreto de haber durado 50 años en el negocio, ¿qué le dirías?</label>
+        <div class="hint">⭐ Esta es la pregunta más importante del cuestionario.</div>
+        <textarea id="q6_3" placeholder="Ej: Ser honesto siempre, no estafar a nadie, saber esperar los momentos difíciles..." oninput="actualizarProgreso()" style="min-height:90px;"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>28. ¿Hay algo que siempre quisiste hacer en el negocio y nunca pudiste o te animaste?</label>
+        <textarea id="q6_4" placeholder="Ej: Dar productos a domicilio, tener una página, vender en ferias de barrio..." oninput="actualizarProgreso()"></textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="pregunta">
+        <label>29. ¿Hay alguien de la familia que esté pensando en continuar el negocio?</label>
+        <div class="opciones" id="q6_5">
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_5')">Sí, ya está involucrado/a</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_5')">Hay alguien interesado</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_5')">No está claro todavía</button>
+          <button class="opcion-btn" onclick="toggleOpcion(this,'q6_5')">No, somos los únicos</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTONES -->
+  <div class="nav-btns no-print">
+    <button class="btn" onclick="abrirTodo()">Ver todo el formulario</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn secundario" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      <button class="btn primario" onclick="verResumen()">Finalizar y ver resumen ▶</button>
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="resultado" id="resultado">
+    <h2>¡Gracias por completar el cuestionario!</h2>
+    <p>Con estas respuestas se puede construir un plan de negocio que realmente refleje la experiencia y visión del puesto — no uno genérico. Compartí este resumen con quien esté trabajando el plan.</p>
+    <div class="resumen-bloque" id="resumen-contenido"></div>
+    <br>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:0.5rem;">
+      <button class="btn no-print" onclick="copiarResumen()" style="font-size:13px;">📋 Copiar respuestas</button>
+      <button class="btn secundario no-print" onclick="window.print()" style="font-size:13px;">🖨️ Imprimir / guardar PDF</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Cuestionario elaborado para el Plan de Negocio — Puesto de Frutas y Verduras, Mercado de Abasto de Córdoba</p>
+    <p style="margin-top:4px;">Para imprimir: Archivo → Imprimir → Guardar como PDF</p>
+  </div>
+
+</div>
+
+<script>
+function toggleBloque(n) {
+  const body = document.getElementById('body'+n);
+  const chev = document.getElementById('chev'+n);
+  const hdr  = document.querySelector('#b'+n+' .bloque-header');
+  const abierto = body.classList.contains('visible');
+  body.classList.toggle('visible', !abierto);
+  chev.classList.toggle('girado', !abierto);
+  hdr.classList.toggle('abierto', !abierto);
+  hdr.classList.toggle('cerrado', abierto);
+}
+
+function abrirTodo() {
+  [1,2,3,4,5,6].forEach(n => {
+    document.getElementById('body'+n).classList.add('visible');
+    document.getElementById('chev'+n).classList.add('girado');
+    const hdr = document.querySelector('#b'+n+' .bloque-header');
+    hdr.classList.add('abierto');
+    hdr.classList.remove('cerrado');
+  });
+}
+
+function toggleOpcion(btn, grupo) {
+  const opts = document.querySelectorAll('#'+grupo+' .opcion-btn');
+  const ya = btn.classList.contains('seleccionado');
+  opts.forEach(o => o.classList.remove('seleccionado'));
+  if (!ya) btn.classList.add('seleccionado');
+  actualizarProgreso();
+}
+
+function getTA(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function getOp(id) { const s = document.querySelector('#'+id+' .seleccionado'); return s ? s.textContent : ''; }
+
+function actualizarProgreso() {
+  const textos = ['q1_1','q1_2','q1_3','q1_5','q2_1','q2_2','q2_3','q2_4','q2_5',
+    'q3_1','q3_2','q3_3','q3_4','q4_1','q4_2','q4_3','q4_4','q5_1','q5_2','q5_3','q5_4','q6_1','q6_3','q6_4'];
+  const opciones = ['q1_4','q1_6','q3_5','q6_2','q6_5'];
+  let total = textos.length + opciones.length, rellenos = 0;
+  textos.forEach(id => { if(getTA(id).length > 3) rellenos++; });
+  opciones.forEach(id => { if(getOp(id)) rellenos++; });
+  const pct = Math.round((rellenos / total) * 100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'% completado';
+  document.getElementById('prog-texto').textContent = rellenos+' de '+total+' preguntas respondidas';
+}
+
+function verResumen() {
+  abrirTodo();
+  const secciones = [
+    { titulo: '🏪 El negocio hoy', items: [
+      getTA('q1_1') && 'Horario y equipo: '+getTA('q1_1'),
+      getTA('q1_2') && 'Productos estrella: '+getTA('q1_2'),
+      getTA('q1_3') && 'Proveedores: '+getTA('q1_3'),
+      getOp('q1_4') && 'Tipo de clientes: '+getOp('q1_4'),
+      getTA('q1_5') && 'Días movidos: '+getTA('q1_5'),
+      getOp('q1_6') && 'Merma semanal: '+getOp('q1_6'),
+    ].filter(Boolean)},
+    { titulo: '🌦️ Clima y estaciones', items: [
+      getTA('q2_1') && 'Mejor época: '+getTA('q2_1'),
+      getTA('q2_2') && 'Efecto del clima: '+getTA('q2_2'),
+      getTA('q2_3') && 'Productos estacionales: '+getTA('q2_3'),
+      getTA('q2_4') && 'Temporada sorpresa: '+getTA('q2_4'),
+      getTA('q2_5') && 'Preparación temporada baja: '+getTA('q2_5'),
+    ].filter(Boolean)},
+    { titulo: '🤝 Los clientes', items: [
+      getTA('q3_1') && 'Por qué te eligen: '+getTA('q3_1'),
+      getTA('q3_2') && 'Clientes históricos: '+getTA('q3_2'),
+      getTA('q3_3') && 'Qué falta: '+getTA('q3_3'),
+      getTA('q3_4') && 'Cambio en el perfil: '+getTA('q3_4'),
+      getOp('q3_5') && 'Uso del celular: '+getOp('q3_5'),
+    ].filter(Boolean)},
+    { titulo: '⚡ Momentos clave', items: [
+      getTA('q4_1') && 'Mejores fechas: '+getTA('q4_1'),
+      getTA('q4_2') && 'Fechas flojas: '+getTA('q4_2'),
+      getTA('q4_3') && 'Momentos de crisis: '+getTA('q4_3'),
+      getTA('q4_4') && 'Productos sorpresa: '+getTA('q4_4'),
+    ].filter(Boolean)},
+    { titulo: '🤲 Colegas y mercado', items: [
+      getTA('q5_1') && 'Relación con colegas: '+getTA('q5_1'),
+      getTA('q5_2') && 'Límites que no se cruzan: '+getTA('q5_2'),
+      getTA('q5_3') && 'Cómo cambió el mercado: '+getTA('q5_3'),
+      getTA('q5_4') && 'Qué podría mejorar: '+getTA('q5_4'),
+    ].filter(Boolean)},
+    { titulo: '💡 Visión del futuro', items: [
+      getTA('q6_1') && 'Objetivo a 2 años: '+getTA('q6_1'),
+      getOp('q6_2') && 'Mayor preocupación: '+getOp('q6_2'),
+      getTA('q6_3') && 'Secreto del éxito: '+getTA('q6_3'),
+      getTA('q6_4') && 'Lo que siempre quiso hacer: '+getTA('q6_4'),
+      getOp('q6_5') && 'Sucesión familiar: '+getOp('q6_5'),
+    ].filter(Boolean)},
+  ];
+
+  let html = '';
+  secciones.forEach(s => {
+    if (!s.items.length) return;
+    html += '<div class="resumen-seccion">';
+    html += '<div class="resumen-titulo">'+s.titulo+'</div>';
+    s.items.forEach(it => {
+      html += '<div class="resumen-item">▸ '+it+'</div>';
+    });
+    html += '</div>';
+  });
+
+  if (!html) html = '<p style="font-size:13px;color:#1B4332;">Todavía no hay respuestas registradas. Completá al menos algunas secciones antes de ver el resumen.</p>';
+
+  document.getElementById('resumen-contenido').innerHTML = html;
+  document.getElementById('resultado').style.display = 'block';
+  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+}
+
+function copiarResumen() {
+  const secciones = [
+    { titulo: 'EL NEGOCIO HOY', items: [
+      getTA('q1_1') && 'Horario y equipo: '+getTA('q1_1'),
+      getTA('q1_2') && 'Productos estrella: '+getTA('q1_2'),
+      getTA('q1_3') && 'Proveedores: '+getTA('q1_3'),
+      getOp('q1_4') && 'Tipo de clientes: '+getOp('q1_4'),
+      getTA('q1_5') && 'Días movidos: '+getTA('q1_5'),
+      getOp('q1_6') && 'Merma semanal: '+getOp('q1_6'),
+    ].filter(Boolean)},
+    { titulo: 'CLIMA Y ESTACIONES', items: [
+      getTA('q2_1') && 'Mejor época: '+getTA('q2_1'),
+      getTA('q2_2') && 'Efecto del clima: '+getTA('q2_2'),
+      getTA('q2_3') && 'Productos estacionales: '+getTA('q2_3'),
+      getTA('q2_4') && 'Temporada sorpresa: '+getTA('q2_4'),
+      getTA('q2_5') && 'Preparación temporada baja: '+getTA('q2_5'),
+    ].filter(Boolean)},
+    { titulo: 'LOS CLIENTES', items: [
+      getTA('q3_1') && 'Por qué te eligen: '+getTA('q3_1'),
+      getTA('q3_2') && 'Clientes históricos: '+getTA('q3_2'),
+      getTA('q3_3') && 'Qué falta: '+getTA('q3_3'),
+      getTA('q3_4') && 'Cambio en el perfil: '+getTA('q3_4'),
+      getOp('q3_5') && 'Uso del celular: '+getOp('q3_5'),
+    ].filter(Boolean)},
+    { titulo: 'MOMENTOS CLAVE', items: [
+      getTA('q4_1') && 'Mejores fechas: '+getTA('q4_1'),
+      getTA('q4_2') && 'Fechas flojas: '+getTA('q4_2'),
+      getTA('q4_3') && 'Momentos de crisis: '+getTA('q4_3'),
+      getTA('q4_4') && 'Productos sorpresa: '+getTA('q4_4'),
+    ].filter(Boolean)},
+    { titulo: 'COLEGAS Y MERCADO', items: [
+      getTA('q5_1') && 'Relación con colegas: '+getTA('q5_1'),
+      getTA('q5_2') && 'Límites que no se cruzan: '+getTA('q5_2'),
+      getTA('q5_3') && 'Cómo cambió el mercado: '+getTA('q5_3'),
+      getTA('q5_4') && 'Qué podría mejorar: '+getTA('q5_4'),
+    ].filter(Boolean)},
+    { titulo: 'VISION DEL FUTURO', items: [
+      getTA('q6_1') && 'Objetivo a 2 años: '+getTA('q6_1'),
+      getOp('q6_2') && 'Mayor preocupación: '+getOp('q6_2'),
+      getTA('q6_3') && 'Secreto del éxito: '+getTA('q6_3'),
+      getTA('q6_4') && 'Lo que siempre quiso hacer: '+getTA('q6_4'),
+      getOp('q6_5') && 'Sucesión familiar: '+getOp('q6_5'),
+    ].filter(Boolean)},
+  ];
+
+  let texto = 'CUESTIONARIO DEL PUESTERO — MERCADO DE ABASTO, CÓRDOBA\n';
+  texto += '='.repeat(55) + '\n\n';
+  secciones.forEach(s => {
+    if (!s.items.length) return;
+    texto += s.titulo + '\n' + '-'.repeat(30) + '\n';
+    s.items.forEach(it => { texto += '• ' + it + '\n'; });
+    texto += '\n';
+  });
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert('¡Respuestas copiadas! Podés pegarlas en un mensaje o documento.');
+  }).catch(() => {
+    alert('No se pudo copiar automáticamente. Usá el botón de imprimir para guardar el formulario.');
+  });
+}
+</script>
+</body>
+</html>
