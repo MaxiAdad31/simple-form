@@ -12,14 +12,14 @@ Este es un cuestionario interactivo diseñado para capturar la experiencia y con
 
 ## Archivos
 
-- `cuestionario_puestero.html`: Archivo principal del cuestionario.
+- `index.html`: Archivo principal del cuestionario.
 - `css/styles.css`: Estilos CSS separados para mejor mantenibilidad.
 - `js/script.js`: Lógica JavaScript para la interactividad.
 - `README.md`: Documentación del proyecto.
 
 ## Uso
 
-1. Abre `cuestionario_puestero.html` en un navegador web.
+1. Abre `index.html` en un navegador web.
 2. Completa las secciones expandiendo cada bloque.
 3. Haz clic en "Finalizar y ver resumen" para generar el resumen.
 4. Usa "Imprimir / PDF" para guardar una copia.
